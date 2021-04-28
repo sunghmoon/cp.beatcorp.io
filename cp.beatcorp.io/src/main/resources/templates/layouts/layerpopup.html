@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" lang="">
+<th:block th:fragment="layerPopup">
+
+
+    <div id="mask"></div>
+
+    <!--Popup Start -->
+    <div id="layerbox" class="layerpop"
+         style="width: 700px; height: 350px;">
+        <article class="layerpop_area">
+            <div class="title">에러입니당</div>
+
+            <div class="content" th:if="${#fields.hasErrors('errorMessage')}" th:errors="*{resultCode}"></div>
+        </article>
+    </div>
+</th:block>

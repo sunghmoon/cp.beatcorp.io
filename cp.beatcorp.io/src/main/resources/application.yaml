@@ -1,0 +1,150 @@
+########################################################################################################################
+### 공통
+########################################################################################################################
+server:
+  port: 8080
+
+  error:
+    whitelabel:
+      enabled: false
+
+mybatis:
+  mapper-locations: classpath:/mybatis/mapper/**/*.xml
+  config-location: classpath:/mybatis/mybatis-config.xml
+  type-handlers-package: io.beatcorp.cp.dto
+  # type-aliases-package: io.beatcorp.cp
+
+#  configuration.:
+#    lazy-loading-enabled: true
+#    aggressive-lazy-loading: false
+#    map-underscore-to-camel-case: true
+#    cache-enabled: false
+#    use-generated-keys: true
+#    default-executor-type: reuse
+#    jdbc-type-for-null: null
+
+
+# spring
+spring:
+  # profile 설정을 안했을 시 active profile
+  profiles:
+    active: local
+
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    initialization-mode: never
+
+    # hikari options
+    hikari:
+      poolName: HIKARI-CP
+      connection-timeout: 10000 # default: 30000 (30s)
+      validation-timeout: 10000 # default: 5000ms
+      max-lifetime: 580000  # 10분으로 셋팅, idle-timeout 보다 커야함,  default: 1800000 (30minutes)
+      idle-timeout: 10000     # 5분으로 셋팅 default: 600000 (10minutes). minimum-idle 이 maximum-pool-size 보다 작게 설정되어 있을때만 설정
+      maximum-pool-size: 10    # 기본값 10
+      minimum-idle: 3         # default: same as maximumPoolSize 이니까 쓰지 말
+      #minimumIdle: 5
+      # connectionTestQuery: SELECT 1 #쓰지말자
+      # if (idleTimeout != IDLE_TIMEOUT && idleTimeout != 0 && minIdle == maxPoolSize) {
+      #         LOGGER.warn("{} - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.");
+      dataSourceProperties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useSSL: false
+        useUnicode: yes
+        characterEncoding: utf-8
+
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+
+  # 최대 파일 size 설정
+  servlet:
+    multipart:
+      max-file-size: -1
+      max-request-size: -1
+
+  ## thymeleaf 설정
+  thymeleaf:
+    check-template-location: true
+    suffix: .html
+    mode: HTML
+    cache: false
+    enabled: true
+    check-template: false
+    prefix: classpath:/templates/ #
+
+
+
+  web:
+    resources:
+      static-locations: classpath:/META-INF/resources, classpath:/resources, classpath:/static, classpath:/public, classpath:/webapp, classpath:/templates
+
+# logging
+logging:
+  file:
+    path: logs
+    name: cp.log
+  pattern:
+    console: "%d %-5level %logger : %msg%n"
+    file: "%d %-5level [%thread] %logger : %msg%n"
+  level:
+    jdbc.sqlonly: ERROR
+    org.springframework.web: INFO
+    com.howtodoinjava: INFO
+    org.hibernate: INFO
+    jdbc.audit: DEBUG
+
+#    jdbc.sqlonly: SQL문 만을 로그로 남기며, PreparedStatement일 경우 관련된 argument 값으로 대체된 SQL문이 보여진다.
+#    jdbc.sqltiming: SQL문과 해당 SQL을 실행시키는데 수행된 시간 정보(milliseconds)를 포함한다.
+#    jdbc.audit: ResultSet을 제외한 모든 JDBC 호출 정보를 로그로 남긴다. 많은 양의 로그가 생성되므로 특별히 JDBC 문제를 추적해야 할 필요가 있는 경우를 제외하고는 사용을 권장하지 않는다.
+#    jdbc.resultset: ResultSet을 포함한 모든 JDBC 호출 정보를 로그로 남기므로 매우 방대한 양의 로그가 생성된다.
+#    jdbc.resultsettable: SQL 결과 조회된 데이터의 table을 로그로 남긴다.
+
+---
+
+########################################################################################################################
+### 로컬
+########################################################################################################################
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://222.99.52.210:53306/STAT?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&validationQuery=select 1
+    username: root
+    password: Qlxmqkrtm2020!
+  config:
+    activate:
+      on-profile: local
+
+---
+
+########################################################################################################################
+### 개발
+########################################################################################################################
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://dev-mysql-instance-1.c6p5j8pbsktn.ap-northeast-2.rds.amazonaws.com:3306/STAT?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&validationQuery=select 1
+    username: root
+    password: ekfzha1!
+  config:
+    activate:
+      on-profile: dev
+
+---
+
+########################################################################################################################
+### 실/운영
+########################################################################################################################
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://222.99.52.210:53306/STAT?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&validationQuery=select 1
+    username: root
+    password: Qlxmqkrtm2020!
+  config:
+    activate:
+      on-profile: prod
+...

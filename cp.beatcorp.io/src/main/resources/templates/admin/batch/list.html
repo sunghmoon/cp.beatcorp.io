@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layouts/default}"
+        lang=""
+>
+
+<div layout:fragment="content">
+    <!-- page content -->
+    <div class="right_col" role="main">
+        <div class="">
+            <div class="row">
+                <div class="title_left">
+                    <h3>배치 리스트</h3>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <div class="x_panel">
+                        <div class="x_content">
+                            <div class="table-responsive">
+                                <table id="datatable-batch" class="table table-striped jambo_table table-bordered bulk_action">
+                                    <thead>
+                                    <tr>
+                                        <th class="column-title">고유 번호</th>
+                                        <th class="column-title">배치 이름</th>
+                                        <th class="column-title">배치 설명</th>
+                                        <th class="column-title">배치 URL</th>
+                                        <th class="column-title">최근 실행 날짜</th>
+                                        <th class="column-title">배치 상태</th>
+
+                                        <th class="column-title">관리</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="b_list : ${list}">
+                                            <td th:text="${b_list.batchIdx}">idx</td>
+                                            <td th:text="${b_list.batchName}">batchName</td>
+                                            <td th:text="${b_list.batchDesc}">batchDesc</td>
+                                            <td th:text="${b_list.batchUrl}">batchUrl</td>
+                                            <td th:text="${#temporals.format(b_list.transactionDate, 'yyyy-MM-dd HH:mm:ss')}">transactionDate</td>
+                                            <td th:text="${b_list.batchStatus.getCode()}">batchStatus</td>
+                                            <td>
+                                                <button type="button"
+                                                        class="btn btn-default btn-xs"
+                                                        data-toggle="modal"
+                                                        data-target=".setBatch-data-modal"
+                                                        th:onclick="'javascript:clickEdit(\''+ ${b_list.batchIdx} +'\')'">수정</button>
+                                                <button type="button"
+                                                        class="btn btn-default btn-xs"
+                                                        data-toggle="modal"
+                                                        data-target=".execBatch-data-modal"
+                                                        th:onclick="'javascript:clickEdit(\''+ ${b_list.batchIdx} +'\')'">실행</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <script  th:inline="javascript">
+                            // BatchDto.Response(batchIdx=2, batchName=aaaa, batchDesc=aaadesc, batchUrl=aaa.com, batchStatus=Y),
+                            // BatchDto.Response(batchIdx=3, batchName=3333, batchDesc=4444, batchUrl=null, batchStatus=Y),
+                            // BatchDto.Response(batchIdx=4, batchName=8888, batchDesc=8888, batchUrl=88888.com, batchStatus=Y)
+
+                            const list = []
+                            /*<![CDATA[*/
+                            /*[# th:each="list : ${list}"]*/
+                            list.push(/*[[${list}]]*/);
+                            /*[/]*/
+                            /*]]>*/
+
+                            let selectItem;
+                            function clickEdit( index ) {
+                                selectItem = list.find( item => item.batchIdx === Number(index) );
+
+                                $('#setBatchKey').text(selectItem.batchIdx);
+                                $('#setBatchIdx').val(selectItem.batchIdx);
+
+                                $('#setBatchName').val(selectItem.batchName);
+                                $('#setBatchName').attr('placeholder', selectItem.batchName);
+
+                                $('#setBatchDesc').val(selectItem.batchDesc);
+                                $('#setBatchDesc').attr('placeholder', selectItem.batchDesc);
+
+                                $('#setBatchUrl').val(selectItem.batchUrl);
+                                $('#setBatchUrl').attr('placeholder', selectItem.batchUrl);
+
+                                $('#setBatchStatus').val(selectItem.batchStatus).prop('selected', true);
+
+                                $('#execBatchKey').text(selectItem.batchIdx);
+                                $('#execBatchIdx').val(selectItem.batchIdx);
+                                $('#execBatchName').text(selectItem.batchName);
+                                $('#execBatchDesc').text(selectItem.batchDesc);
+                                $('#execBatchUrlKey').text(selectItem.batchUrl);
+                                $('#execBatchUrl').val(selectItem.batchUrl);
+                            }
+                        </script>
+
+
+                        <!-- 등록 modal -->
+                        <div class="modal fade addBatch-data-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog modal-sm">
+                                <form class="form-horizontal form-label-left" action="/admin/batch/addBatch">
+                                    <div class="modal-content" style="width:600px">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span></button>
+                                            <h4 class="modal-title" id="addBatchModalLabel">배치 관리 등록</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <br />
+                                            <div class="form-group">
+                                                <label for="batchName" class="control-label col-md-2 col-sm-2 col-xs-12">배치 이름</label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <input type="text" name="batchName" id="batchName" class="form-control" placeholder="예. 커피 추출 소요시간 배치">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="batchDesc" class="control-label col-md-2 col-sm-2 col-xs-12">배치 설명</label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                     <input type="text" class="form-control" name="batchDesc" id="batchDesc" placeholder="예. 매일 01시 실행, QcReport2ndCoffeeDischargeTask()">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="batchUrl" class="control-label col-md-2 col-sm-2 col-xs-12">배치 URL</label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <input type="text" name="batchUrl" id="batchUrl" class="form-control" placeholder="예. /batch/execute/QcReport2ndCoffeeDischargeTask">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="batchStatus" class="control-label col-md-2 col-sm-2 col-xs-12">배치 상태</label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <select name="batchStatus" id="batchStatus" class="form-control">
+                                                        <option value="Y">사용</option>
+                                                        <option value="N">미사용</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-success">Submit</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+
+                        <!-- 수정 modal -->
+                        <div class="modal fade setBatch-data-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog modal-sm">
+                                <form class="form-horizontal form-label-left" action="/admin/batch/setBatch">
+                                    <input type="hidden" name="batchIdx" id="setBatchIdx" class="form-control" value="itemIdx" placeholder="itemName">
+                                    <div class="modal-content" style="width:600px">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span></button>
+                                            <h4 class="modal-title" id="setBatchModalLabel">배치 수정</h4>
+                                        </div>
+                                        <div class="modal-body">
+
+                                            <div class="form-group">
+                                                <span style="font-size:13px; font-weight: bold;" class="control-label col-md-2 col-sm-2 col-xs-12">배치 고유키</span>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <span id="setBatchKey" style="width:100%; text-align:left;" class="control-label col-md-2 col-sm-2 col-xs-12"></span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="setBatchName" class="control-label col-md-2 col-sm-2 col-xs-12">배치 이름</label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <input type="text" name="batchName" id="setBatchName" class="form-control" value="itemName" placeholder="itemName">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="setBatchDesc" class="control-label col-md-2 col-sm-2 col-xs-12">배치 설명</label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <input type="text" name="batchDesc" id="setBatchDesc" class="form-control" value="itemDesc" placeholder="itemDesc">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="setBatchUrl" class="control-label col-md-2 col-sm-2 col-xs-12">배치 URL</label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <input type="text" name="batchUrl" id="setBatchUrl" class="form-control" value="itemUrl" placeholder="itemUrl">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="setBatchStatus" class="control-label col-md-2 col-sm-2 col-xs-12">배치 상태</label>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <select name="batchStatus" id="setBatchStatus" class="form-control" value="itemUse">
+                                                        <option value="Y">사용</option>
+                                                        <option value="N">미사용</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-success">Submit</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+
+                        <!-- 실행 modal -->
+                        <div class="modal fade execBatch-data-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                            <div class="modal-dialog modal-sm">
+                                <form class="form-horizontal form-label-left" action="/batch/execute">
+                                    <input type="hidden" name="batchIdx" id="execBatchIdx" class="form-control" value="itemIdx" placeholder="itemName">
+                                    <input type="hidden" name="batchUrl" id="execBatchUrl" class="form-control" value="itemUrl" placeholder="itemUrl">
+                                    <div class="modal-content" style="width:600px">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span></button>
+                                            <h4 class="modal-title" id="execBatchModalLabel">배치 실행</h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                <span style="font-size:13px; font-weight: bold;" class="control-label col-md-2 col-sm-2 col-xs-12">배치 고유키</span>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <span id="execBatchKey" style="width:100%; text-align:left;" class="control-label col-md-2 col-sm-2 col-xs-12"></span>
+                                                </div>
+                                            </div>
+                                            <div class="ln_solid_margin"></div>
+                                            <div class="form-group">
+                                                <span style="font-size:13px; font-weight: bold;" class="control-label col-md-2 col-sm-2 col-xs-12">배치 이름</span>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <span id="execBatchName" style="width:100%; text-align:left;" class="control-label col-md-2 col-sm-2 col-xs-12"></span>
+                                                </div>
+                                            </div>
+                                            <div class="ln_solid_margin"></div>
+                                            <div class="form-group">
+                                                <span style="font-size:13px; font-weight: bold;" class="control-label col-md-2 col-sm-2 col-xs-12">배치 설명</span>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <span id="execBatchDesc" style="width:100%; text-align:left;" class="control-label col-md-2 col-sm-2 col-xs-12"></span>
+                                                </div>
+                                            </div>
+                                            <div class="ln_solid_margin"></div>
+                                            <div class="form-group">
+                                                <span style="font-size:13px; font-weight: bold;" class="control-label col-md-2 col-sm-2 col-xs-12">배치 URL</span>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <span id="execBatchUrlKey" style="width:100%; text-align:left;" class="control-label col-md-2 col-sm-2 col-xs-12"></span>
+                                                </div>
+                                            </div>
+                                            <div class="ln_solid_margin"></div>
+                                            <div class="form-group">
+                                                <span style="font-size:13px; font-weight: bold;" class="control-label col-md-2 col-sm-2 col-xs-12">배치 날짜</span>
+                                                <div class="col-md-9 col-sm-9 col-xs-12">
+                                                    <input type="text" name="batchDate" id="datePicker" class="form-control" th:value="${yesterday}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-success">Submit</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-default" data-toggle="modal" data-target=".addBatch-data-modal">등록</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

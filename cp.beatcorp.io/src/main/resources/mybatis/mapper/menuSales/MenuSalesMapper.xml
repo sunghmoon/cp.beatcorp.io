@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="io.beatcorp.cp.menuSales.repository.MenuSalesRepository">
+
+<!-- START CoffeeDischarge Result Map ################################################################################ -->
+     <resultMap id="menuSalesListResultMap" type="io.beatcorp.cp.menuSales.dto.MenuSalesDto$Response">
+        <result property="statDate"         column="Stat_Date"      javaType="String"               jdbcType="VARCHAR" />
+        <result property="statData"         column="Stat_Data"      javaType="BigDecimal"           jdbcType="DECIMAL" />
+    </resultMap>
+
+
+    <select id="menuSalesList" parameterType="map" resultMap="menuSalesListResultMap">
+        SELECT 1
+        <!--
+        FROM STAT.STAT_BIS_QC_Report_2nd_Coffee_Discharge_Second
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+                Stat_Date <![CDATA[ >= ]]> DATE_FORMAT(#{condition.startDate}, '%Y-%m-%d')
+                AND Stat_Date <![CDATA[ < ]]> DATE_ADD(DATE_FORMAT(#{condition.endDate}, '%Y-%m-%d'), interval +1 day)
+            <if test='condition.boothCode != null and !condition.boothCode.equals("")'>
+                AND Booth_Code = #{condition.boothCode}
+            </if>
+            <if test="condition.beverageCode != 0">
+                AND Beverage_Code = #{condition.beverageCode}
+            </if>
+        </trim>
+        GROUP BY Stat_Date, Booth_Code, Beverage_Code, Booth_Name, Beverage_Name
+        ORDER BY stat_date, booth_code, Beverage_Code;
+        -->
+    </select>
+
+</mapper>

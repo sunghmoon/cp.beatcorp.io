@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layouts/default}"
+        lang=""
+>
+<head>
+</head>
+
+<div layout:fragment="content">
+    <!-- page content -->
+    <div class="right_col" role="main">
+        <div class="">
+            <div class="row">
+                <div class="title_left">
+                    <h3>커피머신 추출 소요 시간 </h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <div class="x_panel" style="padding-top: 30px; padding-bottom: 30px;">
+
+                        <form id="coffeeDischargeForm" name="coffeeDischargeForm" class="form-inline" th:object="${condition}" th:method="get" th:action="@{/templates/order/coffeeDischarge}">
+                            <input type="hidden" name="startDate" id="startDate" th:value="${condition.startDate} == null ? ${today} : ${condition.startDate}"/>
+                            <input type="hidden" name="endDate" id="endDate" th:value="${condition.endDate} == null ? ${today} : ${condition.endDate}" />
+
+
+                            <div class="form-group">
+                                <div class="controls">
+                                    <div class="input-prepend input-group">
+                                        <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+                                        <input type="text" style="width: 200px"
+                                               id="range_calendar"
+                                               class="form-control"
+                                               th:value="${condition.startDate == null && condition.endDate == null } ? ${today} : |${condition.startDate} - ${condition.endDate}|" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group" style="width:10px;"></div>
+
+                            <div class="form-group">
+                                <label for="booth_code" style="padding-right:5px">매장명</label>
+                                <select class="form-control" id="booth_code" name="boothCode">
+                                    <option value="">전체매장</option>
+                                    <option th:each="booth_list: ${boothCodeList}"
+                                            th:selected="${booth_list.boothCode} ==${condition.boothCode}"
+                                            th:value="${booth_list.boothCode}"
+                                            th:text="${booth_list.boothName}"></option>
+                                </select>
+                            </div>
+
+                            <div class="clearfix form-group" style="width:10px;"></div>
+                            <div class="form-group">
+                                <label for="beverage_code" style="padding-right:5px">음료명</label>
+                                <select class="form-control" id="beverage_code" name="beverageCode">
+                                    <option value="0">전체</option>
+                                    <option th:each="beverage_list: ${beverageCodeList}"
+                                            th:selected="${beverage_list.beverageCode} ==${condition.beverageCode}"
+                                            th:value="${beverage_list.beverageCode}"
+                                            th:text="${beverage_list.beverageName}"></option>
+                                </select>
+                            </div>
+
+                            <div class="clearfix form-group" style="width:10px;"></div>
+
+                            <div class="form-group">
+                                <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+                                    <button type="submit" class="btn btn-success">검색</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <h4>
+            매장명 :<small><th:block th:if="${booth == null}">전체</th:block><th:block th:unless="${booth == null}">[[${booth.boothName}]]</th:block></small>
+            음료명 :<small><th:block th:if="${beverage == null}">전체</th:block><th:block th:unless="${beverage == null}">[[${beverage.beverageName}]]</th:block></small>
+            검색 기간 :<small>
+                <th:block th:if="${condition.startDate == null}">없음</th:block><th:block th:unless="${condition.startDate == null}">[[${condition.startDate}]] ~ [[${condition.endDate}]]</th:block></small></h4>
+
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="tile-stats min-h-180">
+                        <div class="data-title"><i class="fa fa-clock-o"></i> 데이터 건수</div>
+                        <th:block th:if="${responseData.statCount == 0}">
+                            <div class="data-count">데이터 없음</div>
+                        </th:block>
+                        <th:block th:unless="${responseData.statCount == 0}">
+                            <div class="data-count" th:text="|${responseData.statCount} 건|">100 건</div>
+                        </th:block>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="tile-stats min-h-180">
+                        <div class="data-title"><i class="fa fa-clock-o"></i> 평균 추출 시간</div>
+                        <th:block th:if="${responseData.averageData == null}">
+                            <div class="data-count">데이터 없음</div>
+                        </th:block>
+                        <th:block th:unless="${responseData.averageData == null}">
+                            <div class="data-count" th:text="|${responseData.averageData} 초|">100 초</div>
+                        </th:block>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="tile-stats min-h-180">
+                        <div class="data-title"><i class="fa fa-clock-o"></i> 최소 추출 시간</div>
+                        <th:block th:if="${minData == null}">
+                            <div class="data-count">데이터 없음</div>
+                        </th:block>
+                        <th:block th:unless="${minData == null}">
+                            <div class="data-count" th:text="|${minData.coffeeMachineDischarge} 초|">111 초</div>
+                            <table class="data-subtitle-table">
+                                <tr>
+                                    <td class="data-subtitle">주문 번호</td>
+                                    <td><a href="#" th:text="${minData.orderId}" data-toggle="modal" data-target=".min-data-modal" style="color: red"></a></td>
+                                </tr>
+                                <tr>
+                                    <td>주문 날짜</td>
+                                    <td th:text="${#temporals.format(minData.manufactureStartTime, 'yyyy-MM-dd HH:mm:ss')}">2020-01-01</td>
+                                </tr>
+                            </table>
+                        </th:block>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="tile-stats min-h-180">
+                        <div class="data-title"><i class="fa fa-clock-o"></i> 최대 추출 시간</div>
+                        <th:block th:if="${maxData == null}">
+                            <div class="data-count">데이터 없음</div>
+                        </th:block>
+                        <th:block th:unless="${maxData == null}">
+                            <div class="data-count" th:text="|${maxData.coffeeMachineDischarge} 초|">111 초</div>
+                            <table class="data-subtitle-table">
+                                <tr>
+                                    <td class="data-subtitle">주문 번호</td>
+                                    <td><a href="#" th:text="${maxData.orderId}" data-toggle="modal" data-target=".max-data-modal" style="color: red"></a></td>
+                                </tr>
+                                <tr>
+                                    <td>주문 날짜</td>
+                                    <td th:text="${#temporals.format(maxData.manufactureStartTime, 'yyyy-MM-dd HH:mm:ss')}">2020-01-01</td>
+                                </tr>
+                            </table>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <div class="x_panel">
+                        <div class="x_content">
+                            <canvas id="chart" height="80"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <div class="x_panel">
+                        <div class="x_content">
+                            <div class="table-responsive">
+                                <table id="datatable-custom" class="table table-striped jambo_table table-bordered bulk_action">
+                                    <thead>
+                                    <tr>
+                                        <th class="column-title">매장명</th>
+                                        <th class="column-title">음료명</th>
+                                        <th class="column-title">평균 추출 시간(초)</th>
+                                        <th class="column-title">날짜</th>
+                                        <th class="column-title">날짜</th>
+                                        <th class="column-title">날짜</th>
+                                        <th class="column-title">날짜</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="cd_list : ${list}">
+                                            <td th:text="${cd_list.boothName}">booth_name</td>
+                                            <td th:text="${cd_list.beverageName}">booth_name</td>
+                                            <td th:text="${cd_list.statData}">booth_name</td>
+                                            <td th:text="${cd_list.statDate}">booth_name</td>
+                                            <td th:text="${cd_list.statDate}">booth_name</td>
+                                            <td th:text="${cd_list.statDate}">booth_name</td>
+                                            <td th:text="${cd_list.statDate}">booth_name</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- 최소 추출시간 modal -->
+            <div class="modal fade min-data-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content" style="width:600px">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span></button>
+                            <h4 class="modal-title" id="minModalLabel">최소 추출 시간</h4>
+                        </div>
+                        <div class="modal-body">
+                            <th:block th:if="${minData} == null"><h4>데이터 없음</h4></th:block>
+                            <th:block th:unless="${minData} == null">
+                                <table class="table table-hover">
+                                    <colgroup>
+                                        <col width="40%">
+                                        <col width="60%">
+                                    </colgroup>
+                                    <thead>
+                                    <tr style="background-color:#34495E; color: #ECF0F1">
+                                        <th >항목</th>
+                                        <th>값</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>주문 번호</td>
+                                        <td th:text="${minData?.orderId}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>부스 명/코드</td>
+                                        <td th:text="|${minData?.boothName} / ${minData?.boothCode}|"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>음료 명/코드</td>
+                                        <td th:text="|${minData?.beverageName} / ${minData?.beverageCode}|"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>제조 시작 시간</td>
+                                        <td th:text="${#temporals.format(minData?.manufactureStartTime, 'yyyy-MM-dd HH:mm:ss')}">2020-01-01</td>
+                                    </tr>
+                                    <tr>
+                                        <td>제조 완료 시간</td>
+                                        <td th:text="${#temporals.format(minData?.manufactureEndTime, 'yyyy-MM-dd HH:mm:ss')}">2020-01-01</td>
+                                    </tr>
+                                    <tr>
+                                        <td>커피 토출 소요 시간</td>
+                                        <td th:text="${minData?.coffeeMachineDischarge}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>커피머신 ID</td>
+                                        <td th:text="${minData?.coffeeMachineIdEnum.getDesc()}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>컵 디스펜서 ID</td>
+                                        <td th:text="${minData?.cupDispenseIdEnum.getDesc()}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>제빙기 ID</td>
+                                        <td th:text="${minData?.iceMachineIdEnum.getDesc()}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>제빙기 토출 소요 시간</td>
+                                        <td th:text="${minData?.iceMachineDischargeUseTime}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>제빙기 사용 타입</td>
+                                        <td th:text="${minData?.iceMachineUseTypeEnum.getDesc()}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>픽업 무게 왼쪽</td>
+                                        <td th:text="${minData?.pickupLoadcellLeft}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>픽업 무게 오른쪽</td>
+                                        <td th:text="${minData?.pickupLoadcellRight}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>음료 옵션 1</td> <!-- 음료 옵션이 있을 때만 표기 -->
+                                        <td th:text="|${minData?.option1Group} / ${minData?.option1Value}|"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>음료 옵션 2</td><!-- 음료 옵션이 있을 때만 표기 -->
+                                        <td th:text="|${minData?.option2Group} / ${minData?.option2Value}|"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>음료 옵션 3</td><!-- 음료 옵션이 있을 때만 표기 -->
+                                        <td th:text="|${minData?.option3Group} / ${minData?.option3Value}|"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 노즐 ID</td>
+                                        <td th:text="${minData?.nozzleId}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 토출 소요 시간</td>
+                                        <td th:text="${minData?.dischargeUseTime}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 토출 횟수</td>
+                                        <td th:text="${minData?.dischargeCount}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 토출 목표량</td>
+                                        <td th:text="${minData?.dischargeTargetWeight}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 노즐 ID 확장</td>
+                                        <td th:text="${minData?.nozzleIdExt}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 토출 소요 시간 확장</td>
+                                        <td th:text="${minData?.dischargeUseTimeExt}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 토출 횟수 확장</td>
+                                        <td th:text="${minData?.dischargeCountExt}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 토출 목표량 확장</td>
+                                        <td th:text="${minData?.dischargeTargetWeightExt}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 진입 왼쪽 무게</td>
+                                        <td th:text="${minData?.loadcellLeft}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 진입 오른쪽 무게</td>
+                                        <td th:text="${minData?.loadcellRight}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>상태</td>
+                                        <td th:text="${minData?.statusDesc}"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </th:block>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 최소 추출시간 modal -->
+            <div class="modal fade max-data-modal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content" style="width:600px">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span>
+                            </button>
+                            <h4 class="modal-title" id="maxModalLabel">최대 추출 시간</h4>
+                        </div>
+                        <div class="modal-body">
+                            <th:block th:if="${maxData} == null"><h4>데이터 없음</h4></th:block>
+                            <th:block th:unless="${maxData} == null">
+                                <table class="table table-hover">
+                                    <colgroup>
+                                        <col width="40%">
+                                        <col width="60%">
+                                    </colgroup>
+                                    <thead>
+                                    <tr style="background-color:#34495E; color: #ECF0F1">
+                                        <th >항목</th>
+                                        <th>값</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>주문 번호</td>
+                                        <td th:text="${maxData?.orderId}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>부스 명/코드</td>
+                                        <td th:text="|${maxData?.boothName} / ${maxData?.boothCode}|"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>음료 명/코드</td>
+                                        <td th:text="|${maxData?.beverageName} / ${maxData?.beverageCode}|"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>제조 시작 시간</td>
+                                        <td th:text="${#temporals.format(maxData?.manufactureStartTime, 'yyyy-MM-dd HH:mm:ss')}">2020-01-01</td>
+                                    </tr>
+                                    <tr>
+                                        <td>제조 완료 시간</td>
+                                        <td th:text="${#temporals.format(maxData?.manufactureEndTime, 'yyyy-MM-dd HH:mm:ss')}">2020-01-01</td>
+                                    </tr>
+                                    <tr>
+                                        <td>커피 토출 소요 시간</td>
+                                        <td th:text="${maxData?.coffeeMachineDischarge}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>커피머신 ID</td>
+                                        <td th:text="${maxData?.coffeeMachineIdEnum.getDesc()}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>컵 디스펜서 ID</td>
+                                        <td th:text="${maxData?.cupDispenseIdEnum.getDesc()}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>제빙기 ID</td>
+                                        <td th:text="${maxData?.iceMachineIdEnum.getDesc()}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>제빙기 토출 소요 시간</td>
+                                        <td th:text="${maxData?.iceMachineDischargeUseTime}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>제빙기 사용 타입</td>
+                                        <td th:text="${maxData?.iceMachineUseTypeEnum.getDesc()}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>픽업 무게 왼쪽</td>
+                                        <td th:text="${maxData?.pickupLoadcellLeft}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>픽업 무게 오른쪽</td>
+                                        <td th:text="${maxData?.pickupLoadcellRight}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>음료 옵션 1</td> <!-- 음료 옵션이 있을 때만 표기 -->
+                                        <td th:text="|${maxData?.option1Group} / ${maxData?.option1Value}|"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>음료 옵션 2</td><!-- 음료 옵션이 있을 때만 표기 -->
+                                        <td th:text="|${maxData?.option2Group} / ${maxData?.option2Value}|"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>음료 옵션 3</td><!-- 음료 옵션이 있을 때만 표기 -->
+                                        <td th:text="|${maxData?.option3Group} / ${maxData?.option3Value}|"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 노즐 ID</td>
+                                        <td th:text="${maxData?.nozzleId}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 토출 소요 시간</td>
+                                        <td th:text="${maxData?.dischargeUseTime}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 토출 횟수</td>
+                                        <td th:text="${maxData?.dischargeCount}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 토출 목표량</td>
+                                        <td th:text="${maxData?.dischargeTargetWeight}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 노즐 ID 확장</td>
+                                        <td th:text="${maxData?.nozzleIdExt}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 토출 소요 시간 확장</td>
+                                        <td th:text="${maxData?.dischargeUseTimeExt}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 토출 횟수 확장</td>
+                                        <td th:text="${maxData?.dischargeCountExt}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 토출 목표량 확장</td>
+                                        <td th:text="${maxData?.dischargeTargetWeightExt}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 진입 왼쪽 무게</td>
+                                        <td th:text="${maxData?.loadcellLeft}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>주스 디스펜서 진입 오른쪽 무게</td>
+                                        <td th:text="${maxData?.loadcellRight}"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>상태</td>
+                                        <td th:text="${maxData?.statusDesc}"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </th:block>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        var chartLabels = [];
+        var chartData = [];
+        var dataMax = "[[${responseData.maxStatData}]]";
+        var startDate = "[[${condition.startDate}]]";
+        var endDate = "[[${condition.endDate}]]";
+        var boothCode = "[[${condition.boothCode}]]";
+        var beverageCode = "[[${condition.beverageCode}]]";
+
+
+        $.getJSON("http://localhost:8080/dashboard/coffeeDischargeChart",
+                { startDate : startDate,
+                    endDate : endDate,
+                    boothCode : boothCode,
+                    beverageCode : beverageCode
+                },
+                function(data) {
+                    $.each(data, function(inx, obj) {
+                        chartLabels.push(obj.statDate);
+                        chartData.push(obj.statData);
+                    });
+                    $.each(data, function(inx, obj) {
+                        chartLabels.push(obj.statDate);
+                        chartData.push(obj.statData);
+                    });
+                    $.each(data, function(inx, obj) {
+                        chartLabels.push(obj.statDate);
+                        chartData.push(obj.statData);
+                    });
+                    $.each(data, function(inx, obj) {
+                        chartLabels.push(obj.statDate);
+                        chartData.push(obj.statData);
+                    });
+            createChart();
+        });
+
+
+        var lineChartData = {
+            labels : chartLabels,
+            datasets : [{
+                    label : "count",
+                    data : chartData,
+                    borderWidth: 3,
+                    lineTension: 0,
+                    fill: true,
+                    backgroundColor: "rgba(38, 185, 154, 0.31)",
+                    borderColor: "rgba(38, 185, 154, 0.7)",
+                    pointBorderColor: "rgba(38, 185, 154, 0.7)",
+                    pointBackgroundColor: "rgba(38, 185, 154, 0.7)",
+                    pointHoverBackgroundColor: "#fff",
+                    pointHoverBorderColor: "rgba(220,220,220,1)",
+                    pointBorderWidth: 2,
+
+                /*
+                    borderColor:'#FF00FF',
+                    pointStrokeColor : "#fff",
+                    pointHighlightFill : "#fff",
+                    pointHighlightStroke : "rgba(151,187,205,1)"
+
+                 */
+                }]
+        };
+
+        function createChart() {
+            ctx = document.getElementById("chart");
+            chart = new Chart(ctx, {
+                type: 'line',
+                data : lineChartData,
+                options : {
+                    responsive: true,
+                    scales : {
+                        yAxes : [ {
+                            ticks : {
+                                beginAtZero : true,
+                                // the data maximum used for determining the ticks is Math.max(dataMax, suggestedMax)
+                                //suggestedMax: 50
+                                suggestedMax: dataMax * 1.4,
+                                //max: dataMax * 1.4,
+                            }
+                        } ]
+                    }
+                }
+            })
+        }
+    </script>
+</div>
+</html>

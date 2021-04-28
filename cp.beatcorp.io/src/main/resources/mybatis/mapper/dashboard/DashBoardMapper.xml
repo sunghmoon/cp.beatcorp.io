@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="io.beatcorp.cp.dashboard.repository.DashBoardRepository">
+
+<!-- ######################################## QualityControl 공통 Result Map ######################################## -->
+    <resultMap id="getQualityControlInfoResultMap" type="io.beatcorp.cp.dashboard.dto.DashBoardDto$Response">
+        <result property="orderId"                             column="Order_Id"                           javaType="long"                 jdbcType="BIGINT"/>
+        <result property="boothCode"                           column="Booth_Code"                         javaType="String"               jdbcType="VARCHAR"/>
+        <result property="boothName"                            column="Booth_Name"                         javaType="String"               jdbcType="VARCHAR"/>
+        <result property="manufactureStartTime"               column="Manufacture_Start_Time"             javaType="java.time.LocalDateTime"        jdbcType="DATE"     typeHandler="org.apache.ibatis.type.LocalDateTimeTypeHandler" />
+        <result property="manufactureEndTime"                 column="Manufacture_End_Time"               javaType="java.time.LocalDateTime"        jdbcType="DATE"     typeHandler="org.apache.ibatis.type.LocalDateTimeTypeHandler" />
+        <result property="cupDispenseIdEnum"                      column="Cup_Dispense_Id"                    typeHandler="io.beatcorp.cp.common.enums.EnumTypeHandler"/>
+        <result property="iceMachineIdEnum"                       column="Ice_Machine_Id"                     typeHandler="io.beatcorp.cp.common.enums.EnumTypeHandler"/>
+        <result property="iceMachineDischargeUseTime"       column="Ice_Machine_Discharge_Use_Time"     javaType="BigDecimal"           jdbcType="DECIMAL"/>
+        <result property="iceMachineUseTypeEnum"                 column="Ice_Machine_Use_Type"               typeHandler="io.beatcorp.cp.common.enums.EnumTypeHandler"/>
+        <result property="coffeeMachineIdEnum"             column="Coffee_Machine_Id"                typeHandler="io.beatcorp.cp.common.enums.EnumTypeHandler"/>
+        <result property="coffeeMachineDischarge"             column="Coffee_Machine_Discharge"           javaType="BigDecimal"           jdbcType="DECIMAL"/>
+        <result property="pickupLoadcellLeft"                 column="Pickup_Loadcell_Left"               javaType="BigDecimal"           jdbcType="DECIMAL"/>
+        <result property="pickupLoadcellRight"                column="Pickup_Loadcell_Right"              javaType="BigDecimal"           jdbcType="DECIMAL"/>
+        <result property="beverageCode"                        column="Beverage_Code"                      javaType="int"                  jdbcType="INTEGER"/>
+        <result property="beverageName"                        column="Beverage_Name"                      javaType="String"               jdbcType="VARCHAR"/>
+        <result property="option1Group"                       column="Option_1_Group"                     javaType="String"               jdbcType="VARCHAR"/>
+        <result property="option1Value"                       column="Option_1_Value"                     javaType="String"               jdbcType="VARCHAR"/>
+        <result property="option2Group"                       column="Option_2_Group"                     javaType="String"               jdbcType="VARCHAR"/>
+        <result property="option2Value"                       column="Option_2_Value"                     javaType="String"               jdbcType="VARCHAR"/>
+        <result property="option3Group"                       column="Option_3_Group"                     javaType="String"               jdbcType="VARCHAR"/>
+        <result property="option3Value"                       column="Option_3_Value"                     javaType="String"               jdbcType="VARCHAR"/>
+        <result property="nozzleId"                            column="Nozzle_Id"                          javaType="int"                  jdbcType="INTEGER"/>
+        <result property="dischargeUseTime"                   column="Discharge_Use_Time"                 javaType="BigDecimal"           jdbcType="DECIMAL"/>
+        <result property="dischargeCount"                      column="Discharge_Count"                    javaType="int"                  jdbcType="INTEGER"/>
+        <result property="dischargeTargetWeight"              column="Discharge_Target_Weight"            javaType="int"                  jdbcType="INTEGER"/>
+        <result property="nozzleIdExt"                        column="Nozzle_Id_Ext"                      javaType="int"                  jdbcType="INTEGER"/>
+        <result property="dischargeUseTimeExt"               column="Discharge_Use_Time_Ext"             javaType="BigDecimal"           jdbcType="DECIMAL"/>
+        <result property="dischargeCountExt"                  column="Discharge_Count_Ext"                javaType="int"                  jdbcType="INTEGER"/>
+        <result property="dischargeTargetWeightExt"          column="Discharge_Target_Weight_Ext"        javaType="int"                  jdbcType="INTEGER"/>
+        <result property="loadcellLeft"                        column="Loadcell_Left"                      javaType="BigDecimal"           jdbcType="DECIMAL"/>
+        <result property="loadcellRight"                       column="Loadcell_Right"                     javaType="BigDecimal"           jdbcType="DECIMAL"/>
+        <result property="status"                               column="Status"                             javaType="int"                  jdbcType="INTEGER"/>
+        <result property="statusDesc"                          column="Status_Desc"                        javaType="String"               jdbcType="VARCHAR"/>
+    </resultMap>
+<!-- ######################################## QualityControl 공통 Result Map ######################################## -->
+
+<!-- START CoffeeDischarge Result Map ################################################################################ -->
+     <resultMap id="coffeeDischargeChartResultMap" type="io.beatcorp.cp.dashboard.dto.DashBoardDto$Response">
+        <result property="statDate"         column="Stat_Date"      javaType="String"               jdbcType="VARCHAR" />
+        <result property="statData"         column="Stat_Data"      javaType="BigDecimal"           jdbcType="DECIMAL" />
+    </resultMap>
+
+
+    <resultMap id="coffeeDischargeListResultMap" type="io.beatcorp.cp.dashboard.dto.DashBoardDto$Response">
+        <result property="boothCode"       column="Booth_Code"         javaType="String"            jdbcType="VARCHAR" />
+        <result property="boothName"       column="Booth_Name"         javaType="String"            jdbcType="VARCHAR" />
+        <result property="beverageCode"    column="Beverage_Code"      javaType="int"               jdbcType="INTEGER" />
+        <result property="beverageName"    column="Beverage_Name"      javaType="String"            jdbcType="VARCHAR" />
+        <result property="statDate"        column="Stat_Date"          javaType="String"            jdbcType="VARCHAR" />
+        <result property="statData"        column="Stat_Data"          javaType="BigDecimal"        jdbcType="DECIMAL" />
+    </resultMap>
+<!-- END CoffeeDischarge Result Map ################################################################################ -->
+
+
+
+    <select id="getCoffeeDischargeMinMax" parameterType="map" resultMap="getQualityControlInfoResultMap">
+        SELECT
+                Report.Order_Id,
+                Booth_Code,
+                Booth_Name,
+                Manufacture_Start_Time,
+                Manufacture_End_Time,
+                Cup_Dispense_Id,
+                Ice_Machine_Id,
+                Ice_Machine_Discharge_Use_Time,
+                Ice_Machine_Use_Type,
+                Coffee_Machine_Id,
+                Coffee_Machine_Discharge,
+                Pickup_Loadcell_Left,
+                Pickup_Loadcell_Right,
+                Beverage_Code,
+                Beverage_Name,
+                Option_1_Group,
+                Option_1_Value,
+                Option_2_Group,
+                Option_2_Value,
+                Option_3_Group,
+                Option_3_Value,
+                Nozzle_Id,
+                Discharge_Use_Time,
+                Discharge_Count,
+                Discharge_Target_Weight,
+                Nozzle_Id_Ext,
+                Discharge_Use_Time_Ext,
+                Discharge_Count_Ext,
+                Discharge_Target_Weight_Ext,
+                Loadcell_Left,
+                Loadcell_Right,
+                Report.Status,
+                Status_Desc
+        FROM STAT.BIS_QC_Report_2nd AS Report
+        JOIN STAT.BIS_QC_Report_2nd_Beverage_Option AS Beverage ON Report.Order_Id = Beverage.Order_Id
+        LEFT JOIN STAT.BIS_QC_Report_2nd_Juice_Dispense AS Juice ON Report.Order_Id = Juice.Order_Id
+        LEFT JOIN STAT.BIS_QC_Report_2nd_Status AS Status ON Report.Status = Status.Status
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+                Manufacture_Start_Time <![CDATA[ >= ]]> DATE_FORMAT(#{condition.startDate}, '%Y-%m-%d')
+                AND Manufacture_Start_Time <![CDATA[ < ]]> DATE_ADD(DATE_FORMAT(#{condition.endDate}, '%Y-%m-%d'), interval +1 day)
+            <if test='condition.boothCode != null and !condition.boothCode.equals("")'>
+                AND Booth_Code = #{condition.boothCode}
+            </if>
+            <if test="condition.beverageCode != 0">
+                AND Beverage_Code = #{condition.beverageCode}
+            </if>
+        </trim>
+        <choose>
+            <when test='condition.orderSort == "asc" and condition.orderSort.equals("asc")'>
+                ORDER BY Coffee_Machine_Discharge, Manufacture_Start_Time LIMIT 1
+            </when>
+            <when test='condition.orderSort == "desc" and condition.orderSort.equals("desc")'>
+                ORDER BY Coffee_Machine_Discharge DESC, Manufacture_Start_Time DESC LIMIT 1
+            </when>
+        </choose>
+    </select>
+
+
+    <select id="coffeeDischargeChart" parameterType="map" resultMap="coffeeDischargeChartResultMap">
+        SELECT
+                DATE_FORMAT(Stat_Date,'%Y-%m-%d') AS Stat_Date,
+                TRUNCATE(AVG(Average_Coffee_Second), 2) AS Stat_Data
+        FROM STAT.STAT_BIS_QC_Report_2nd_Coffee_Discharge_Second
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+                Stat_Date <![CDATA[ >= ]]> DATE_FORMAT(#{condition.startDate}, '%Y-%m-%d')
+                AND Stat_Date <![CDATA[ < ]]> DATE_ADD(DATE_FORMAT(#{condition.endDate}, '%Y-%m-%d'), interval +1 day)
+            <if test='condition.boothCode != null and !condition.boothCode.equals("")'>
+                AND Booth_Code = #{condition.boothCode}
+            </if>
+            <if test="condition.beverageCode!=0">
+                AND Beverage_Code = #{condition.beverageCode}
+            </if>
+        </trim>
+        GROUP BY Stat_Date
+        ORDER BY Stat_Date;
+    </select>
+
+    <select id="coffeeDischargeList" parameterType="map" resultMap="coffeeDischargeListResultMap">
+        SELECT
+                Booth_Code,
+                Booth_Name,
+                Beverage_Code,
+                Beverage_Name,
+                DATE_FORMAT(Stat_Date,'%Y-%m-%d') AS Stat_Date,
+                TRUNCATE(AVG(Average_Coffee_Second), 2) AS Stat_Data
+        FROM STAT.STAT_BIS_QC_Report_2nd_Coffee_Discharge_Second
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+                Stat_Date <![CDATA[ >= ]]> DATE_FORMAT(#{condition.startDate}, '%Y-%m-%d')
+                AND Stat_Date <![CDATA[ < ]]> DATE_ADD(DATE_FORMAT(#{condition.endDate}, '%Y-%m-%d'), interval +1 day)
+            <if test='condition.boothCode != null and !condition.boothCode.equals("")'>
+                AND Booth_Code = #{condition.boothCode}
+            </if>
+            <if test="condition.beverageCode != 0">
+                AND Beverage_Code = #{condition.beverageCode}
+            </if>
+        </trim>
+        GROUP BY Stat_Date, Booth_Code, Beverage_Code, Booth_Name, Beverage_Name
+        ORDER BY stat_date, booth_code, Beverage_Code;
+    </select>
+
+</mapper>

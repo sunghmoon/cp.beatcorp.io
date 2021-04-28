@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+        layout:decorate="~{layouts/default}"
+        lang=""
+>
+
+
+<div layout:fragment="content">
+
+
+    <!-- page content -->
+    <div class="right_col" role="main">
+
+
+        <div class="row">
+                <div class="title_left">
+                    <h3>매출 정보</h3>
+                </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel" style="padding-top: 30px; padding-bottom: 30px;">
+
+                    <form id="coffeeDischargeForm" name="coffeeDischargeForm" class="form-inline" th:object="${condition}" th:method="get" th:action="@{/templates/order/coffeeDischarge}">
+                        <input type="hidden" name="startDate" id="startDate" th:value="${condition.startDate} == null ? ${today} : ${condition.startDate}"/>
+                        <input type="hidden" name="endDate" id="endDate" th:value="${condition.endDate} == null ? ${today} : ${condition.endDate}" />
+
+
+                        <div class="form-group">
+                            <div class="controls">
+                                <div class="input-prepend input-group">
+                                    <span class="add-on input-group-addon"><i class="glyphicon glyphicon-calendar fa fa-calendar"></i></span>
+                                    <input type="text" style="width: 200px"
+                                           id="range_calendar"
+                                           class="form-control"
+                                           th:value="${condition.startDate == null && condition.endDate == null } ? ${today} : |${condition.startDate} - ${condition.endDate}|" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" style="width:10px;"></div>
+
+                        <div class="form-group">
+                            <label for="booth_code" style="padding-right:5px">매장명</label>
+                            <select class="form-control" id="booth_code" name="boothCode">
+                                <option value="">전체매장</option>
+                                <option th:each="booth_list: ${boothCodeList}"
+                                        th:selected="${booth_list.boothCode} ==${condition.boothCode}"
+                                        th:value="${booth_list.boothCode}"
+                                        th:text="${booth_list.boothName}"></option>
+                            </select>
+                        </div>
+
+                        <div class="clearfix form-group" style="width:10px;"></div>
+                        <div class="form-group">
+                            <label for="beverage_code" style="padding-right:5px">음료명</label>
+                            <select class="form-control" id="beverage_code" name="beverageCode">
+                                <option value="0">전체</option>
+                                <option th:each="beverage_list: ${beverageCodeList}"
+                                        th:selected="${beverage_list.beverageCode} ==${condition.beverageCode}"
+                                        th:value="${beverage_list.beverageCode}"
+                                        th:text="${beverage_list.beverageName}"></option>
+                            </select>
+                        </div>
+
+                        <div class="clearfix form-group" style="width:10px;"></div>
+
+                        <div class="form-group">
+                            <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+                                <button type="submit" class="btn btn-success">검색</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                <div class="tile-stats min-h-180">
+                    <div class="data-title"><i class="fa fa-clock-o"></i> AAAA</div>
+                    <div class="data-count" th:text="|500 건|">100 건</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                <div class="tile-stats min-h-180">
+                    <div class="data-title"><i class="fa fa-clock-o"></i> AAAA</div>
+                    <div class="data-count" th:text="|500 건|">100 건</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                <div class="tile-stats min-h-180">
+                    <div class="data-title"><i class="fa fa-clock-o"></i> AAAA</div>
+                    <div class="data-count" th:text="|500 건|">100 건</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                <div class="tile-stats min-h-180">
+                    <div class="data-title"><i class="fa fa-clock-o"></i> AAAA</div>
+                    <div class="data-count" th:text="|500 건|">100 건</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                    <div class="row x_title">
+                        <div class="col-md-6">
+                            <h3>세부 내역 <small>소제목..소제목..</small></h3>
+                        </div>
+
+                    </div>
+                    <div class="x_content">
+                        <div class="table-responsive">
+                            <table id="datatable-custom" class="table table-striped jambo_table table-bordered bulk_action">
+                                <thead>
+                                <tr>
+                                    <th class="column-title">주문날짜</th>
+                                    <th class="column-title">주문번호(통합주문번호)</th>
+                                    <th class="column-title">매장주문번호</th>
+                                    <th class="column-title">메뉴명</th>
+                                    <th class="column-title">주문채널</th>
+                                    <th class="column-title">결제수단</th>
+                                    <th class="column-title">금액</th>
+                                    <th class="column-title">할인</th>
+                                    <th class="column-title">결제금액</th>
+                                    <th class="column-title">주문상태</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="cd_list : ${list}">
+                                    <th class="column-title">주문날짜</th>
+                                    <th class="column-title">주문번호(통합주문번호)</th>
+                                    <th class="column-title">매장주문번호</th>
+                                    <th class="column-title">메뉴명</th>
+                                    <th class="column-title">주문채널</th>
+                                    <th class="column-title">결제수단</th>
+                                    <th class="column-title">금액</th>
+                                    <th class="column-title">할인</th>
+                                    <th class="column-title">결제금액</th>
+                                    <th class="column-title">주문상태</th>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /page content -->
+</div>
+</html>

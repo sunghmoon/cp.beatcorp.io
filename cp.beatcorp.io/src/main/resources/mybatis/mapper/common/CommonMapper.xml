@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="io.beatcorp.cp.common.repository.CommonRepository">
+
+    <resultMap id="beverageCodeListResultMap" type="io.beatcorp.cp.common.dto.CommonDto$Response">
+        <result property="beverageCode"    column="Beverage_Code"      javaType="String"          jdbcType="VARCHAR" />
+        <result property="beverageName"    column="Beverage_Name"      javaType="String"       jdbcType="VARCHAR" />
+    </resultMap>
+
+    <resultMap id="boothCodeListResultMap" type="io.beatcorp.cp.common.dto.CommonDto$Response">
+        <result property="boothCode"       column="Booth_Code"         javaType="String"       jdbcType="VARCHAR" />
+        <result property="boothName"       column="Booth_Name"         javaType="String"       jdbcType="VARCHAR" />
+    </resultMap>
+
+    <select id="beverageCodeList" parameterType="map" resultMap="beverageCodeListResultMap">
+        SELECT
+               code AS Beverage_Code,
+               name_ko AS Beverage_Name
+        FROM beat_app.tb_menu
+        GROUP BY code
+        ORDER BY code;
+    </select>
+
+    <select id="boothCodeList" parameterType="map" resultMap="boothCodeListResultMap">
+        SELECT
+               code AS Booth_Code,
+               name_ko AS Booth_Name
+        FROM beat_app.tb_store
+        GROUP BY code
+        ORDER BY code;
+    </select>
+
+
+    <select id="getBeverageName" parameterType="map" resultMap="beverageCodeListResultMap">
+        SELECT
+            code AS Beverage_Code,
+            name_ko AS Beverage_Name
+        FROM beat_app.tb_menu
+        WHERE code = #{beverageCode}
+    </select>
+
+    <select id="getBoothName" parameterType="map" resultMap="boothCodeListResultMap">
+        SELECT
+            code AS Booth_Code,
+            name_ko AS Booth_Name
+        FROM beat_app.tb_store
+        WHERE code = #{boothCode}
+    </select>
+</mapper>

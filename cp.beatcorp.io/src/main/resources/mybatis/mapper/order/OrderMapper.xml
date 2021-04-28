@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="io.beatcorp.cp.order.repository.OrderRepository">
+
+<!-- START CoffeeDischarge Result Map ################################################################################ -->
+     <resultMap id="orderListResultMap" type="io.beatcorp.cp.order.dto.OrderDto$Response">
+        <result property="statDate"         column="Stat_Date"      javaType="String"               jdbcType="VARCHAR" />
+        <result property="statData"         column="Stat_Data"      javaType="BigDecimal"           jdbcType="DECIMAL" />
+    </resultMap>
+
+
+    <!--    #{department, mode=OUT, jdbcType=CURSOR, javaType=ResultSet, resultMap=departmentResultMap}-->
+    <insert id="orderList" statementType="CALLABLE" parameterType="map">
+
+                { call up_bo_order_list_v5 (
+                    #{condition.batchDate,  mode=IN,    javaType=String,    jdbcType=VARCHAR},
+                    #{condition.resultCode,           mode=OUT,   javaType=int,       jdbcType=INTEGER}
+
+
+                    IN p_order_id int,
+                    IN p_store_code varchar(200),
+                    IN p_user_id varchar(100),
+                    IN p_user_name varchar(100),
+                    IN p_user_mobile varchar(20),
+                    IN p_order_status varchar(20),
+                    IN p_order_date_start datetime,
+                    IN p_order_date_end datetime,
+                    IN p_channel char(20),
+                    IN p_coupon_code varchar(4),
+                    IN p_menu_code varchar(20),
+                    IN p_pay_method varchar(20),
+                    IN p_store_type int,
+                    IN p_store_code_list varchar(200),
+                    IN p_booth_version int,
+                    IN p_service_type varchar(20),
+                    IN p_discount_type varchar(10),
+                    IN p_search_type varchar(50),
+                    IN p_search_keyword varchar(50),
+                    IN p_current_page int,
+                    IN p_per_page int)
+
+
+                )
+                }
+
+
+    </insert>
+
+
+<!--    -->
+<!--    <select id="orderList" parameterType="map" resultMap="orderListResultMap">-->
+<!--        SELECT 1-->
+<!--        &lt;!&ndash;-->
+<!--        FROM STAT.STAT_BIS_QC_Report_2nd_Coffee_Discharge_Second-->
+<!--        <trim prefix="WHERE" prefixOverrides="AND |OR ">-->
+<!--                Stat_Date <![CDATA[ >= ]]> DATE_FORMAT(#{condition.startDate}, '%Y-%m-%d')-->
+<!--                AND Stat_Date <![CDATA[ < ]]> DATE_ADD(DATE_FORMAT(#{condition.endDate}, '%Y-%m-%d'), interval +1 day)-->
+<!--            <if test='condition.boothCode != null and !condition.boothCode.equals("")'>-->
+<!--                AND Booth_Code = #{condition.boothCode}-->
+<!--            </if>-->
+<!--            <if test="condition.beverageCode != 0">-->
+<!--                AND Beverage_Code = #{condition.beverageCode}-->
+<!--            </if>-->
+<!--        </trim>-->
+<!--        GROUP BY Stat_Date, Booth_Code, Beverage_Code, Booth_Name, Beverage_Name-->
+<!--        ORDER BY stat_date, booth_code, Beverage_Code;-->
+<!--        &ndash;&gt;-->
+<!--    </select>-->
+
+</mapper>
